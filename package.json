@@ -1,0 +1,85 @@
+{
+  "name": "vscode-cc-model-switch",
+  "displayName": "Claude Code Model Switch",
+  "description": "Switch the Claude Code extension between Anthropic-compatible API providers and profiles from the status bar.",
+  "version": "0.2.0",
+  "publisher": "mikrop",
+  "license": "Apache-2.0",
+  "icon": "images/icon.png",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikrop/vscode-cc-model-switch.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "openrouter",
+    "env",
+    "config",
+    "switch"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ccModelSwitch.selectEnv",
+        "title": "Switch Claude Code Environment",
+        "category": "CCModelSwitch"
+      },
+      {
+        "command": "ccModelSwitch.showConfig",
+        "title": "Open Environment Panel",
+        "category": "CCModelSwitch"
+      },
+      {
+        "command": "ccModelSwitch.selectProfile",
+        "title": "Switch Claude Code Profile",
+        "category": "CCModelSwitch"
+      },
+      {
+        "command": "ccModelSwitch.setToken",
+        "title": "Set API Token",
+        "category": "CCModelSwitch"
+      },
+      {
+        "command": "ccModelSwitch.editSettings",
+        "title": "Edit settings.json",
+        "category": "CCModelSwitch"
+      },
+      {
+        "command": "ccModelSwitch.editEnvs",
+        "title": "Edit Environment Presets",
+        "category": "CCModelSwitch"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "~1.85.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  }
+}

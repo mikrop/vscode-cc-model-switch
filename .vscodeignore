@@ -1,0 +1,15 @@
+.vscode/**
+.vscode-test/**
+.claude/**
+src/**
+out/test/**
+release/**
+*.vsix
+.gitignore
+.yarnrc
+**/tsconfig.json
+**/eslint.config.mjs
+**/*.map
+**/*.ts
+**/.vscode-test.*
+images/*.svg
