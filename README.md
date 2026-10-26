@@ -5,7 +5,7 @@
 A VS Code / VSCodium extension that writes the selected provider preset (base URL, models, API token) into the `claudeCode.environmentVariables` setting of the Claude Code extension. The Claude Code CLI in your terminal and its `~/.claude/settings.json` are left alone.
 
 - **Extension ID:** `mikrop.vscode-cc-model-switch`
-- **Repository:** <https://github.com/mikrop/vscode-cc-model-switch> (private)
+- **Repository:** <https://github.com/mikrop/vscode-cc-model-switch>
 - **Requires:** the Claude Code extension (`anthropic.claude-code`)
 
 ## Features
