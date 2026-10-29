@@ -2,7 +2,7 @@
   "name": "vscode-cc-model-switch",
   "displayName": "Claude Code Model Switch",
   "description": "Switch the Claude Code extension between Anthropic-compatible API providers and profiles from the status bar.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "mikrop",
   "license": "Apache-2.0",
   "icon": "images/icon.png",

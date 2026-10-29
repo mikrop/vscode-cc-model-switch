@@ -4,6 +4,13 @@ All notable changes to the "vscode-cc-model-switch" extension will be documented
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.3.1]
+
+### Changed
+- README: screenshots, installation from Open VSX, and the session copy feature.
+- The publish workflow uses `actions/checkout@v5` and `actions/setup-node@v5`.
+- `serialize-javascript` is pinned to a non-vulnerable version (development dependency only).
+
 ## [0.3.0]
 
 ### Added

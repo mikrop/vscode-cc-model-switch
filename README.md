@@ -55,7 +55,7 @@ An extension installed this way is updated from Open VSX (use **Extensions: Chec
 **VS Code:** it uses the Visual Studio Marketplace, so download the `.vsix` from the [Open VSX page](https://open-vsx.org/extension/mikrop/vscode-cc-model-switch) and install it. Such an installation is not updated automatically:
 
 ```bash
-code --install-extension vscode-cc-model-switch-0.3.0.vsix
+code --install-extension vscode-cc-model-switch-0.3.1.vsix
 ```
 
 **From source:** build and install the package locally:
@@ -63,8 +63,8 @@ code --install-extension vscode-cc-model-switch-0.3.0.vsix
 ```bash
 npm ci
 npx @vscode/vsce package
-code --install-extension vscode-cc-model-switch-0.3.0.vsix     # VS Code
-codium --install-extension vscode-cc-model-switch-0.3.0.vsix   # VSCodium
+code --install-extension vscode-cc-model-switch-0.3.1.vsix     # VS Code
+codium --install-extension vscode-cc-model-switch-0.3.1.vsix   # VSCodium
 ```
 
 ## Usage
