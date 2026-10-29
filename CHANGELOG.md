@@ -4,6 +4,14 @@ All notable changes to the "vscode-cc-model-switch" extension will be documented
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.3.0]
+
+### Added
+- **Copy Sessions From Another Profile**: copies sessions of the open workspace from another profile into the active one. Sessions are compared by content, never by modification time; a session the active profile has further along is never overwritten, a replaced file is kept as `<id>.jsonl.bak`.
+
+### Changed
+- The Open VSX publish workflow uses trusted publishing (`ovsx publish --trusted-publishing`) instead of the `OVSX_PAT` secret.
+
 ## [0.2.0]
 
 ### Changed

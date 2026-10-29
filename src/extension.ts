@@ -17,6 +17,15 @@ import {
 	buildEnvList,
 	withProfile
 } from './presets';
+import {
+	SessionInfo,
+	SessionRelation,
+	encodeProjectPath,
+	findProjectDir,
+	listSessions,
+	compareSession,
+	copySession
+} from './sessions';
 
 // Claude Code extension setting the variables are written to
 const CLAUDE_CODE_SECTION = 'claudeCode';
@@ -388,6 +397,106 @@ async function selectProfile(): Promise<void> {
 		refreshUi();
 		void vscode.window.showInformationMessage(`Profile: ${selected.profile.label}. Start a new Claude Code session to use it.`);
 	});
+}
+
+// A session changed this recently may still be running
+const RECENT_SESSION_MS = 2 * 60 * 1000;
+
+const RELATION_TEXT: Record<SessionRelation, string> = {
+	'new': 'New in this profile',
+	'identical': 'Already identical, nothing to copy',
+	'source-ahead': 'Goes further than the copy in this profile (the copy will be updated)',
+	'target-ahead': 'This profile has more work, it will NOT be overwritten',
+	'diverged': 'Differs from the copy in this profile (replacing needs confirmation)'
+};
+
+// Copy sessions of the open workspace from another profile into the active one
+async function copySessions(): Promise<void> {
+	const targetConfigDir = getActiveConfigDir();
+	const sources = listProfiles().filter(p => path.resolve(p.configDir ?? getClaudeDir()) !== path.resolve(targetConfigDir));
+	if (!sources.length) {
+		void vscode.window.showInformationMessage('There is no other profile to copy sessions from. Create a ~/.claude-<name> folder first.');
+		return;
+	}
+	const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	if (!cwd) {
+		void vscode.window.showWarningMessage('Open a folder first, sessions are copied for the open workspace.');
+		return;
+	}
+
+	const targetLabel = profileLabel(targetConfigDir);
+	const pickedProfile = await vscode.window.showQuickPick(
+		sources.map(p => ({ label: p.label, description: p.configDir ?? getClaudeDir(), profile: p })),
+		{ placeHolder: `Copy sessions into the profile "${targetLabel}". From which profile?` }
+	);
+	if (!pickedProfile) {
+		return;
+	}
+
+	try {
+		const sourceConfigDir = pickedProfile.profile.configDir ?? getClaudeDir();
+		const sourceProjectDir = findProjectDir(sourceConfigDir, cwd);
+		const sessions = sourceProjectDir ? listSessions(sourceProjectDir) : [];
+		if (!sessions.length) {
+			void vscode.window.showInformationMessage(`The profile "${pickedProfile.profile.label}" has no sessions for ${cwd}.`);
+			return;
+		}
+
+		const targetProjectDir = findProjectDir(targetConfigDir, cwd) ?? path.join(targetConfigDir, 'projects', encodeProjectPath(cwd));
+		const items = sessions.map(session => {
+			const relation = compareSession(session.file, path.join(targetProjectDir, path.basename(session.file)));
+			const recent = Date.now() - session.modified.getTime() < RECENT_SESSION_MS ? ' · changed a moment ago, may still be running' : '';
+			return {
+				label: session.preview ?? session.id,
+				description: `${session.modified.toLocaleString()} · ${Math.ceil(session.size / 1024)} KB${recent}`,
+				detail: RELATION_TEXT[relation],
+				session,
+				relation
+			};
+		});
+
+		const picked = await vscode.window.showQuickPick(items, {
+			placeHolder: `Sessions to copy from "${pickedProfile.profile.label}" into "${targetLabel}"`,
+			canPickMany: true,
+			matchOnDetail: true
+		});
+		if (!picked?.length) {
+			return;
+		}
+
+		const skipped = picked.filter(i => i.relation === 'identical' || i.relation === 'target-ahead');
+		const fresh = picked.filter(i => i.relation === 'new');
+		const replacing = picked.filter(i => i.relation === 'source-ahead' || i.relation === 'diverged');
+
+		if (replacing.length) {
+			const diverged = replacing.filter(i => i.relation === 'diverged').length;
+			const answer = await vscode.window.showWarningMessage(
+				`Replace ${replacing.length} existing session(s) in the profile "${targetLabel}"?`,
+				{
+					modal: true,
+					detail: (diverged ? `${diverged} of them differ from the source, so work done only in "${targetLabel}" would be replaced. ` : '')
+						+ 'Each replaced file is kept next to it as <id>.jsonl.bak.'
+				},
+				'Replace'
+			);
+			if (answer !== 'Replace') {
+				replacing.length = 0;
+			}
+		}
+
+		const toCopy: SessionInfo[] = [...fresh, ...replacing].map(i => i.session);
+		for (const session of toCopy) {
+			copySession(session, targetProjectDir);
+		}
+
+		const notes = [`Copied ${toCopy.length} session(s) into the profile "${targetLabel}"`];
+		if (skipped.length) {
+			notes.push(`${skipped.length} skipped (identical or already further in this profile)`);
+		}
+		void vscode.window.showInformationMessage(`${notes.join(', ')}. Resume them from the Claude Code session history.`);
+	} catch (e) {
+		void vscode.window.showErrorMessage(`Cannot copy sessions: ${errorMessage(e)}`);
+	}
 }
 
 // Update the status bar
@@ -793,6 +902,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.registerCommand('ccModelSwitch.showConfig', () => showConfigPanel()),
 		vscode.commands.registerCommand('ccModelSwitch.setToken', () => setToken()),
 		vscode.commands.registerCommand('ccModelSwitch.selectProfile', () => selectProfile()),
+		vscode.commands.registerCommand('ccModelSwitch.copySessions', () => copySessions()),
 		vscode.commands.registerCommand('ccModelSwitch.editSettings', () => openFile(getSettingsPath(), '{}\n')),
 		vscode.commands.registerCommand('ccModelSwitch.editEnvs', () =>
 			openFile(getEnvsConfigPath(), JSON.stringify({ presets: DEFAULT_PRESETS }, null, 2) + '\n'))
@@ -815,6 +925,11 @@ export function activate(context: vscode.ExtensionContext) {
 				label: '$(account) Switch profile',
 				description: 'Select the Claude Code config folder (CLAUDE_CONFIG_DIR)',
 				command: 'ccModelSwitch.selectProfile'
+			},
+			{
+				label: '$(copy) Copy sessions from another profile',
+				description: 'Continue work started in another profile; never overwrites newer work',
+				command: 'ccModelSwitch.copySessions'
 			},
 			{
 				label: '$(key) Set API token',

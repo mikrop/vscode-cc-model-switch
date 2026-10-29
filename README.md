@@ -32,8 +32,8 @@ The extension is not published to the Marketplace. Build and install the package
 ```bash
 npm ci
 npx @vscode/vsce package
-code --install-extension vscode-cc-model-switch-0.2.0.vsix     # VS Code
-codium --install-extension vscode-cc-model-switch-0.2.0.vsix   # VSCodium
+code --install-extension vscode-cc-model-switch-0.3.0.vsix     # VS Code
+codium --install-extension vscode-cc-model-switch-0.3.0.vsix   # VSCodium
 ```
 
 ## Usage
@@ -58,6 +58,7 @@ All commands are in the **CCModelSwitch** category of the command palette (`Ctrl
 | Switch Claude Code Environment | `ccModelSwitch.selectEnv` | Pick and switch the preset |
 | Switch Claude Code Profile | `ccModelSwitch.selectProfile` | Pick the Claude Code config folder |
 | Open Environment Panel | `ccModelSwitch.showConfig` | View all presets and the current configuration |
+| Copy Sessions From Another Profile | `ccModelSwitch.copySessions` | Copy sessions of the open workspace from another profile into the active one |
 | Set API Token | `ccModelSwitch.setToken` | Store or remove the API token of a preset |
 | Edit settings.json | `ccModelSwitch.editSettings` | Edit the Claude Code settings of the active profile |
 | Edit Environment Presets | `ccModelSwitch.editEnvs` | Edit the presets file |
@@ -91,6 +92,22 @@ All commands are in the **CCModelSwitch** category of the command palette (`Ctrl
 ### Profiles
 
 **Switch profile** lists `~/.claude` (default) and every `~/.claude-<name>` folder. Selecting a profile sets `CLAUDE_CONFIG_DIR` in the setting (the default profile removes it). Profiles and presets are independent; switching a preset keeps the profile.
+
+### Copying sessions between profiles
+
+Every profile keeps its own conversation history, so `claude --continue` / `--resume` in one profile does not see the work done in another. **Copy Sessions From Another Profile** copies chosen sessions of the open workspace from another profile into the active one. It is always a manual choice, nothing is copied automatically.
+
+Each session is compared with the copy in the active profile by **content**, not by modification time (a copy gets a new time, and a file can be touched without new work). A session only grows, so the one that contains the other is the newer one:
+
+| Active profile has | Result |
+|--------------------|--------|
+| no such session | copied |
+| the same content | skipped |
+| the beginning of the source | updated after confirmation, the old file is kept as `<id>.jsonl.bak` |
+| **more than the source** | **never overwritten**, the list says so |
+| content that differs from the source | replaced only after an explicit confirmation, the old file is kept as `<id>.jsonl.bak` |
+
+> **Note:** Sessions are stored in an internal Claude Code format (`<profile>/projects/<project>/<id>.jsonl`) that may change. Copies develop independently afterwards. A session contains the whole conversation including tool output, so copying it from a personal to a work profile moves that data to the other account. Do not copy a session that is still running.
 
 ### envs.json format
 
