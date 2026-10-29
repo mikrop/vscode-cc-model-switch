@@ -13,3 +13,7 @@ release/**
 **/*.ts
 **/.vscode-test.*
 images/*.svg
+
+# README screenshots are linked from the repository, only the icon is packaged
+images/*.png
+!images/icon.png

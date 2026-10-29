@@ -16,7 +16,22 @@ A VS Code / VSCodium extension that writes the selected provider preset (base UR
 - 📝 **Visual panel** - shows the current configuration and all presets
 - 🌐 **Status bar indicator** - always shows the preset and profile in use
 - 🔧 **Custom presets** - add any Anthropic-compatible provider in `envs.json`
+- 📋 **Session copy** - continue work started in another profile; a session with more work is never overwritten
 - 🖥️ **Editor only** - terminal sessions and their own provider setup are not affected
+
+## Screenshots
+
+Click the status bar item for the quick actions:
+
+![Quick actions menu](images/quick-actions.png)
+
+Switch the provider preset:
+
+![Switch environment](images/switch-preset.png)
+
+The panel shows the current configuration and all presets:
+
+![Environment panel](images/panel.png)
 
 ## Bundled presets
 
@@ -27,7 +42,23 @@ A VS Code / VSCodium extension that writes the selected provider preset (base UR
 
 ## Installation
 
-The extension is not published to the Marketplace. Build and install the package locally:
+The extension is published on [Open VSX](https://open-vsx.org/extension/mikrop/vscode-cc-model-switch), not on the Visual Studio Marketplace.
+
+**VSCodium:** open the Extensions view and search for `Claude Code Model Switch`, or run:
+
+```bash
+codium --install-extension mikrop.vscode-cc-model-switch
+```
+
+An extension installed this way is updated from Open VSX (use **Extensions: Check for Extension Updates**).
+
+**VS Code:** it uses the Visual Studio Marketplace, so download the `.vsix` from the [Open VSX page](https://open-vsx.org/extension/mikrop/vscode-cc-model-switch) and install it. Such an installation is not updated automatically:
+
+```bash
+code --install-extension vscode-cc-model-switch-0.3.0.vsix
+```
+
+**From source:** build and install the package locally:
 
 ```bash
 npm ci
